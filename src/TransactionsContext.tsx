@@ -3,7 +3,7 @@ import { ReactNode, createContext, useState, useEffect } from 'react';
 
 import { api } from './services/api';
 
-interface Transactions {
+interface Transaction {
   id: number;
   title: string;
   amount: number;
@@ -12,14 +12,23 @@ interface Transactions {
   createdAt: string;
 }
 
+type TransactionsInput = Omit<Transaction, 'id' | 'createdAt'>;
+
 interface TransactionsProviderProps {
   children: ReactNode;
 }
 
-export const TransactionsContext = createContext<Transactions[]>([]);
+interface TransactionsContextData {
+  transactions: Transaction[];
+  createTransaction: (transaction: TransactionsInput) => void;
+}
+
+export const TransactionsContext = createContext<TransactionsContextData>(
+  {} as TransactionsContextData,
+);
 
 export function TransactionsProvider({ children }: TransactionsProviderProps) {
-  const [transactions, setTransaction] = useState<Transactions[]>([]);
+  const [transactions, setTransaction] = useState<Transaction[]>([]);
 
   useEffect(() => {
     api
@@ -27,8 +36,13 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
       .then(({ data }) => setTransaction(data.transactions));
   }, []);
 
+  function createTransaction(transaction: TransactionsInput) {
+    api.post('/transactions', transaction);
+  }
+
   return (
-    <TransactionsContext.Provider value={transactions}>
+    // eslint-disable-next-line react/jsx-no-constructed-context-values
+    <TransactionsContext.Provider value={{ transactions, createTransaction }}>
       {children}
     </TransactionsContext.Provider>
   );
