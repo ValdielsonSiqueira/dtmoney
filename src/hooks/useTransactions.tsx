@@ -1,7 +1,13 @@
 // eslint-disable-next-line object-curly-newline
-import { ReactNode, createContext, useState, useEffect } from 'react';
+import {
+  ReactNode,
+  createContext,
+  useState,
+  useEffect,
+  useContext,
+} from 'react';
 
-import { api } from './services/api';
+import { api } from '../services/api';
 
 interface Transaction {
   id: number;
@@ -23,7 +29,7 @@ interface TransactionsContextData {
   createTransaction: (transaction: TransactionsInput) => Promise<void>;
 }
 
-export const TransactionsContext = createContext<TransactionsContextData>(
+const TransactionsContext = createContext<TransactionsContextData>(
   {} as TransactionsContextData,
 );
 
@@ -53,4 +59,10 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
       {children}
     </TransactionsContext.Provider>
   );
+}
+
+export function useTransactions() {
+  const context = useContext(TransactionsContext);
+
+  return context;
 }
